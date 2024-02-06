@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+    /*primary color*/
+    --primary-color: #faad14;
+    --warning-color: #fa541c;
+    --background-color: #050606;
+    --text-color:#ecf0f1;
+    --primary-shadow-color: rgba( 250, 173, 20, 0.6 );
+    --background-yellow:rgba(250,173,20, 0.05);
+}
