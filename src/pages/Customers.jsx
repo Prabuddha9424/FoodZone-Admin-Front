@@ -1,29 +1,13 @@
-import {Input, Row, Table} from "antd";
+import {Input, message, Row, Spin, Table} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
-import UpdateAdminUser from "../components/adminUsers/UpdateAdminUser.jsx";
 import {useEffect, useState} from "react";
-import {FaEdit, FaEye} from "react-icons/fa";
+import {FaEye} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import ViewCustomer from "../components/customers/ViewCustomer.jsx";
+import {deleteCustomers, getAllCustomers} from "../helpers/ApiHelpers.jsx";
 
-const dataSource = [
-    {
-        key: '1',
-        id: 'user1',
-        name: 'Mike',
-        email: 'mike@gmail.com',
-        phone: 711234567,
-        address: '10 Downing Street',
-    },
-    {
-        key: '2',
-        id: 'user2',
-        name: 'John',
-        email: 'john@gmail.com',
-        phone: 711234667,
-        address: '10 Downing Street',
-    },
-];
+
+let allCustomersData = [];
 
 const columns = [
     {
@@ -52,46 +36,57 @@ const columns = [
         key: 'option',
     },
 ];
+
 function Customers() {
     const [tableData, setTableData] = useState();
     const [dataLoading, setDataLoading] = useState()
     const [isModelOpen, setIsModelOpen] = useState(false);
-    const [modelData, setModelData] = useState()
+    const [modelData, setModelData] = useState();
+    const [messageApi, contextHolder] = message.useMessage();
+    const [spinning, setSpinning] = useState(false);
+
     useEffect(() => {
-        setData(dataSource)
+        fetchData();
     }, []);
+    const fetchData = async () => {
+        const response = await getAllCustomers();
+        allCustomersData = response.data;
+        await setData(allCustomersData);
+    }
     const setData = (dataArr) => {
         setDataLoading(true);
-        if (dataArr.length != null) {
+        if (dataArr === null) {
+            setTableData([]);
+        } else if (dataArr.length != null) {
             let tableRows = [];
             dataArr.forEach((data, x) => {
                 let dataRow = {
-                        key: x,
-                        name: data.name,
-                        email: data.email,
-                        phone: data.phone,
-                        address: data.address,
-                        option: (
-                            <div className="flex flex-row gap-4 text-2xl">
-                                <a
-                                    onClick={() => {
-                                        viewData(data);
-                                    }}>
-                                    <FaEye style={{fontSize: '18px'}}/>
-                                </a>
-                                <a
-                                    onClick={() => {
-                                        deleteData(data);
-                                    }}>
-                                    <AiFillDelete style={{fontSize: '18px'}}/>
-                                </a>
-                            </div>
-                        ),
-                    }
-                ;
+                    key: x,
+                    name: data.name,
+                    email: data.email,
+                    image: data.image,
+                    phone: data.phone,
+                    address: data.address,
+                    option: (
+                        <div className="flex flex-row gap-4 text-2xl">
+                            <a
+                                onClick={() => {
+                                    viewData(data);
+                                }}>
+                                <FaEye style={{fontSize: '18px'}}/>
+                            </a>
+                            <a
+                                onClick={() => {
+                                    deleteData(data);
+                                }}>
+                                <AiFillDelete style={{fontSize: '18px'}}/>
+                            </a>
+                        </div>
+                    ),
+                };
                 tableRows.push(dataRow);
-                setTableData(tableRows);
-            })
+            });
+            setTableData(tableRows);
         } else {
             setTableData([]);
         }
@@ -100,65 +95,81 @@ function Customers() {
     const viewData = (data) => {
         setModelData(data);
         setIsModelOpen(!isModelOpen);
-        //setData(dataSource);
     };
     const closeModel = () => {
         setIsModelOpen(!isModelOpen);
 
     };
-    const deleteData = (data) => {
-        console.log(data.id);
-        setData(dataSource);
+    const deleteData = async (data) => {
+        setSpinning(true);
+        try {
+            const response = await deleteCustomers(data._id);
+            setSpinning(false);
+            messageApi.open({
+                type: 'success',
+                content: `${response.data.message}`,
+            });
+        } catch (err) {
+            setSpinning(false);
+            messageApi.open({
+                type: 'error',
+                content: `${err.response.data.message}`,
+            });
+        }
+        await fetchData();
+        console.log('ok');
     };
     const searchData = (text) => {
-        let filtered = dataSource.filter((data) => {
+        let filtered = allCustomersData.filter((data) => {
             return (data.name.toLowerCase().includes(text.toLowerCase()));
         });
         setData(filtered);
     };
     return (
         <div>
-            <Row>
-                <p className="text-xl font-serif p-4 text-primaryColor">All Customers</p>
-                <div
-                    className="flex flex-row w-100px md:w-[200px] items-center h-auto rounded-2xl">
-                    <Input
-                        className="rounded-full"
-                        type="text"
-                        placeholder="Search Customer"
-                        onChange={(e) => {
-                            searchData(e.target.value);
+            <Spin spinning={spinning}>
+                {contextHolder}
+                <Row>
+                    <p className="text-xl font-serif p-4 text-primaryColor">All Customers</p>
+                    <div
+                        className="flex flex-row w-100px md:w-[200px] items-center h-auto rounded-2xl">
+                        <Input
+                            className="rounded-full"
+                            type="text"
+                            placeholder="Search Customer"
+                            onChange={(e) => {
+                                searchData(e.target.value);
+                            }}
+                            suffix={<SearchOutlined
+                                style={{fontSize: '16px', color: 'var(--border-blue)', fontWeight: 'bolder'}}
+                                className="site-form-item-icon"/>}
+                        />
+                    </div>
+                </Row>
+                <Row>
+                    <Table
+                        className="w-full"
+                        dataSource={tableData}
+                        columns={columns}
+                        loading={dataLoading}
+                        pagination={{
+                            size: "small",
+                            defaultPageSize: 5,
+                            showSizeChanger: true,
+                            pageSizeOptions: ["5", "10", "20"],
+                            showQuickJumper: true,
                         }}
-                        suffix={<SearchOutlined
-                            style={{fontSize: '16px', color: 'var(--border-blue)', fontWeight: 'bolder'}}
-                            className="site-form-item-icon"/>}
                     />
-                </div>
-            </Row>
-            <Row>
-                <Table
-                    className="w-full"
-                    dataSource={tableData}
-                    columns={columns}
-                    loading={dataLoading}
-                    pagination={{
-                        size: "small",
-                        defaultPageSize: 5,
-                        showSizeChanger: true,
-                        pageSizeOptions: ["5", "10", "20"],
-                        showQuickJumper: true,
-                    }}
-                />
-                {(isModelOpen)?
-                    <ViewCustomer
-                        modalOpenClose={isModelOpen}
-                        data={modelData}
-                        handleCancel={closeModel}
-                    />:
-                    <></>
-                }
-
-            </Row>
+                    {(isModelOpen) ?
+                        <ViewCustomer
+                            modalOpenClose={isModelOpen}
+                            data={modelData}
+                            handleCancel={closeModel}
+                        /> :
+                        <></>
+                    }
+                </Row>
+            </Spin>
         </div>
     );
 }
