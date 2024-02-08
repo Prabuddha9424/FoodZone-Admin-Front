@@ -78,6 +78,9 @@ function DashboardMain() {
                     Card: {
                         colorBgContainer: "rgba(250,173,20, 0.05)",
                         boxShadowTertiary:"0 1px 2px 0 rgba(250,173,20, 0.3), 0 1px 6px -1px rgba(250,173,20, 0.2), 0 2px 4px 0 rgba(250,173,20, 0.2)"
+                    },
+                    Modal: {
+                        contentBg: "var(--model-background)"
                     }
                 }
             }}

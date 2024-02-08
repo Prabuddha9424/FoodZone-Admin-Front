@@ -22,3 +22,29 @@ export async function getAllCustomers(){
 export async function deleteCustomers(id){
     return await axios.delete(`${url}/customers/delete-by-id/${id}`);
 }
+export async function countAllCustomers(){
+    return await axios.get(`${url}/customers/count-all`);
+}
+/*********************** Food Items API ****************************/
+export async function AddProduct(data){
+    return await axios.post(`${url}/products/create`,data);
+}
+export async function getAllProducts(){
+    return await axios.get(`${url}/products/find-all`);
+}
+export async function deleteProduct(id){
+    return await axios.delete(`${url}/products/delete-by-id/${id}`);
+}
+export async function updateProduct(id,data){
+    return await axios.put(`${url}/products/update/${id}`,data);
+}
+/*********************** Orders API ****************************/
+export async function getAllOrders(){
+    return await axios.get(`${url}/orders/find-all`);
+}
+export async function deleteOrder(id){
+    return await axios.delete(`${url}/orders/delete-by-id/${id}`);
+}
+export async function updateOrder(id,data){
+    return await axios.put(`${url}/orders/update/${id}`,data);
+}

@@ -10,4 +10,13 @@
     --text-color:#ecf0f1;
     --primary-shadow-color: rgba( 250, 173, 20, 0.6 );
     --background-yellow:rgba(250,173,20, 0.05);
+    --model-background:rgba(33, 39, 39,0.95);
+    --success-color:#52c41a;
+    --danger-color:#ff4d4f;
+}
+
+input[type="file" i] {
+    text-align: start !important;
+    padding: initial;
+    border: initial;
 }

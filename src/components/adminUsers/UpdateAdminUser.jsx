@@ -1,5 +1,5 @@
 import {Button, Col, Form, Input, Modal, Row} from "antd";
-import {AddAdminUser, updateAdminUsers} from "../../helpers/ApiHelpers.jsx";
+import {updateAdminUsers} from "../../helpers/ApiHelpers.jsx";
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
@@ -11,7 +11,7 @@ const tailFormItemLayout = {
 };
 
 function UpdateAdminUser({modalOpenClose, handleCancel, data}) {
-    const [form] = Form.useForm();
+    const [adminUpdateForm] = Form.useForm();
     const onFinishModel = async (values) => {
         const response=await updateAdminUsers(data._id,values);
         handleCancel(response);
@@ -30,7 +30,7 @@ function UpdateAdminUser({modalOpenClose, handleCancel, data}) {
             >
                 <Form
                     {...formItemLayout}
-                    form={form}
+                    form={adminUpdateForm}
                     name="register"
                     onFinish={onFinishModel}
                     scrollToFirstError

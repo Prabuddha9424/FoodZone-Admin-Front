@@ -11,7 +11,10 @@ export default {
         WarningColor: "var(--warning-color)",
         BackgroundColor: "var(--background-color)",
         textColor:"var(--text-color)",
-        backgroundYellow:"var(--background-yellow)"
+        backgroundYellow:"var(--background-yellow)",
+        modelBackground:"var(--model-background)",
+        dangerColor:"var(--danger-color)",
+        successColor:"var(--success-color)",
       },
       fontFamily: {
         serif: ['DM Serif Display', 'serif'],
