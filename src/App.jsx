@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import FoodItems from "./pages/FoodItems.jsx";
 import Orders from "./pages/Orders.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
+import Login from "./pages/Login.jsx";
 function App() {
 
 
@@ -20,6 +21,7 @@ function App() {
               <Route path='orders' element={<Orders/>}/>
               <Route path='reset-password' element={<ResetPassword/>}/>
           </Route>
+          <Route path='login' element={<Login/>}/>
       </Routes>
 
     </Router>

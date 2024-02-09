@@ -38,6 +38,9 @@ export async function deleteProduct(id){
 export async function updateProduct(id,data){
     return await axios.put(`${url}/products/update/${id}`,data);
 }
+export async function countAllProducts(){
+    return await axios.get(`${url}/products/count-all`);
+}
 /*********************** Orders API ****************************/
 export async function getAllOrders(){
     return await axios.get(`${url}/orders/find-all`);
@@ -47,4 +50,7 @@ export async function deleteOrder(id){
 }
 export async function updateOrder(id,data){
     return await axios.put(`${url}/orders/update/${id}`,data);
+}
+export async function countAllOrders(){
+    return await axios.get(`${url}/orders/count-all`);
 }

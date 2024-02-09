@@ -9,8 +9,7 @@ import {
     Legend,
 } from 'chart.js';
 import {Bar} from 'react-chartjs-2';
-import {faker} from '@faker-js/faker';
-import {countAllCustomers, deleteProduct} from "../helpers/ApiHelpers.jsx";
+import {countAllCustomers, countAllOrders, countAllProducts} from "../helpers/ApiHelpers.jsx";
 import {useEffect, useState} from "react";
 
 ChartJS.register(
@@ -30,7 +29,7 @@ const options = {
         },
         title: {
             display: true,
-            text: 'ORDERS & REVENUES',
+            text: 'ORDERS & CUSTOMERS',
         },
     },
 };
@@ -42,12 +41,13 @@ const data = {
     datasets: [
         {
             label: 'Orders',
-            data: labels.map(() => faker.datatype.number({min: 0, max: 1000})),
+            //data: labels.map(() => faker.datatype.number({min: 0, max: 1000})),
+            data: [10,20,30,40,50,60],
             backgroundColor: 'rgb(21 128 61)',
         },
         {
             label: 'Revenues',
-            data: labels.map(() => faker.datatype.number({min: 0, max: 1000})),
+            data: [15,22,32,48,70,60],
             backgroundColor: 'rgb(185 28 28)',
         },
     ],
@@ -56,10 +56,14 @@ const data = {
 function Dashboard() {
     const [spinning, setSpinning] = useState(false);
     const [allCustomers, setAllCustomers] = useState("")
+    const [allProducts, setAllProducts] = useState("")
+    const [allOrders, setAllOrders] = useState("")
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
         countCustomers();
+        countProducts();
+        countOrders();
     }, []);
     const changeOption = (val) => {
         console.log(val);
@@ -67,7 +71,19 @@ function Dashboard() {
     const countCustomers = async () => {
         setSpinning(true);
         const response = await countAllCustomers();
-        setAllCustomers(response ? response.data : "");
+        setAllCustomers(response ? response.data : "0");
+        setSpinning(false);
+    };
+    const countProducts = async () => {
+        setSpinning(true);
+        const response = await countAllProducts();
+        setAllProducts(response ? response.data : "0");
+        setSpinning(false);
+    };
+    const countOrders = async () => {
+        setSpinning(true);
+        const response = await countAllOrders();
+        setAllOrders(response ? response.data : "0");
         setSpinning(false);
     };
     return (
@@ -83,8 +99,8 @@ function Dashboard() {
                 </Row>
                 <Row gutter={[24, 24]} className="pt-10">
                     <DashboardCard title="TOTAL CUSTOMERS" value={allCustomers}/>
-                    <DashboardCard title="TOTAL FOOD ITEMS" value="20"/>
-                    <DashboardCard title="TOTAL ORDERS" value="10"/>
+                    <DashboardCard title="TOTAL FOOD ITEMS" value={allProducts}/>
+                    <DashboardCard title="TOTAL ORDERS" value={allOrders}/>
                 </Row>
                 <Row className="p-6 pt-24">
                     <Col xs={{span: 24}} md={{span: 12}} lg={{span: 8}}>

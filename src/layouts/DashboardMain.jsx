@@ -49,7 +49,7 @@ function DashboardMain() {
                     colorInfo: "#faad14",
                     colorWarning: "#fa541c",
                     colorBgBase: "#050606",
-                    colorBgContainer: "#050606"
+                    colorBgContainer: "#050606",
                     // borderRadius: 13,
                 },
                 components: {
