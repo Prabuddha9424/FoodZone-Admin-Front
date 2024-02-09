@@ -144,7 +144,11 @@ const Login = () => {
                         </Col>
                     </Row>
                 </Content>
-                <Footer style={footerStyle}>Footer</Footer>
+                <Footer style={footerStyle}>
+                    <p className="mb-0">
+                        PSDev Design ©{new Date().getFullYear()} Created by Prabuddha Jayasekara
+                    </p>
+                </Footer>
             </Layout>
         </ConfigProvider>
     );
