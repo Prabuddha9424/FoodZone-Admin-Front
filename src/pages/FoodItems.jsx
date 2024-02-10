@@ -1,13 +1,14 @@
-import {Button, Col, Form, Input, message, Row, Spin, Table,} from 'antd';
+import {Button, Col, Form, Input, message, Row, Select, Spin, Table,} from 'antd';
 import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import {SearchOutlined} from "@ant-design/icons";
-import {storage} from "../config/FirebaseConfig.jsx";
+import {storage} from "../config/FirebaseConfig.js";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage"
 import {v4} from "uuid";
-import {AddProduct, deleteProduct, getAllProducts} from "../helpers/ApiHelpers.jsx";
+import {AddProduct, deleteProduct, getAllProducts} from "../helpers/ApiHelpers.js";
 import UpdateFoodItems from "../components/foodItems/UpdateFoodItems.jsx";
+const { Option } = Select;
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
@@ -63,6 +64,27 @@ function FoodItems() {
     const [imageUpload, setImageUpload] = useState(null);
     const [spinning, setSpinning] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
+
+    const onCategoryChange = (value) => {
+        switch (value) {
+            case 'setMenu':
+                foodItemForm.setFieldsValue({
+                    note: 'Set Menu',
+                });
+                break;
+            case 'desert':
+                foodItemForm.setFieldsValue({
+                    note: 'Desert',
+                });
+                break;
+            case 'beverage':
+                foodItemForm.setFieldsValue({
+                    note: 'Beverage',
+                });
+                break;
+            default:
+        }
+    };
 
     useEffect(() => {
         fetchData();
@@ -212,12 +234,18 @@ function FoodItems() {
                                     rules={[
                                         {
                                             required: true,
-                                            message: 'Please input food category!',
-                                            whitespace: true,
                                         },
                                     ]}
                                 >
-                                    <Input/>
+                                    <Select
+                                        placeholder="Select food category"
+                                        onChange={onCategoryChange}
+                                        allowClear
+                                    >
+                                        <Option value="Set Menu">Set Menu</Option>
+                                        <Option value="Desert">Desert</Option>
+                                        <Option value="Beverage">Beverage</Option>
+                                    </Select>
                                 </Form.Item>
                                 <Form.Item
                                     name="qty"

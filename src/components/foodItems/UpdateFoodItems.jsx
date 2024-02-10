@@ -1,9 +1,11 @@
-import {Button, Col, Form, Input, message, Modal, Row} from "antd";
-import {updateProduct} from "../../helpers/ApiHelpers.jsx";
+import {Button, Col, Form, Input, message, Modal, Row, Select} from "antd";
+import {updateProduct} from "../../helpers/ApiHelpers.js";
 import {useState} from "react";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
-import {storage} from "../../config/FirebaseConfig.jsx";
+import {storage} from "../../config/FirebaseConfig.js";
 import {v4} from "uuid";
+
+const { Option } = Select;
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
@@ -18,6 +20,27 @@ function UpdateFoodItems({modalOpenClose, handleCancel, data}) {
     const [foodUpdateForm] = Form.useForm();
     const [imageUpload, setImageUpload] = useState(null);
     const [messageApi, contextHolder] = message.useMessage();
+
+    const onCategoryChange = (value) => {
+        switch (value) {
+            case 'setMenu':
+                foodUpdateForm.setFieldsValue({
+                    note: 'Set Menu',
+                });
+                break;
+            case 'desert':
+                foodUpdateForm.setFieldsValue({
+                    note: 'Desert',
+                });
+                break;
+            case 'beverage':
+                foodUpdateForm.setFieldsValue({
+                    note: 'Beverage',
+                });
+                break;
+            default:
+        }
+    };
     const onFinishModel = async (values) => {
         try {
             const uploadImageUrl = await uploadImage();
@@ -84,16 +107,25 @@ function UpdateFoodItems({modalOpenClose, handleCancel, data}) {
                             <Form.Item
                                 name="category"
                                 label="Category"
-                                initialValue={data ? data.category : ""}
                                 rules={[
                                     {
                                         required: true,
-                                        message: 'Please input food category!',
-                                        whitespace: true,
                                     },
                                 ]}
                             >
-                                <Input/>
+                                <Select
+                                    placeholder="Select food category"
+                                    onChange={onCategoryChange}
+                                    allowClear
+                                    defaultValue={{
+                                        value: `${data ? data.category : ""}`,
+                                        label: `${data ? data.category : ""}`,
+                                    }}
+                                >
+                                    <Option value="Set Menu">Set Menu</Option>
+                                    <Option value="Desert">Desert</Option>
+                                    <Option value="Beverage">Beverage</Option>
+                                </Select>
                             </Form.Item>
                             <Form.Item
                                 name="qty"
@@ -103,7 +135,6 @@ function UpdateFoodItems({modalOpenClose, handleCancel, data}) {
                                     {
                                         required: true,
                                         message: 'Please input food quantity!',
-                                        whitespace: true,
                                     },
                                 ]}
                             >

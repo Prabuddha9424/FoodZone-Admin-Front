@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {FaEye} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import ViewCustomer from "../components/customers/ViewCustomer.jsx";
-import {deleteCustomers, getAllCustomers} from "../helpers/ApiHelpers.jsx";
+import {deleteCustomers, getAllCustomers} from "../helpers/ApiHelpers.js";
 
 
 let allCustomersData = [];

@@ -1,7 +1,10 @@
 import {LockOutlined, UserOutlined} from '@ant-design/icons';
-import {Layout, Menu, Button, theme, ConfigProvider, Form, Input, Checkbox, Row, Col} from 'antd';
+import {Layout, Button, theme, ConfigProvider, Form, Input, Checkbox, Row, Col} from 'antd';
 import LoginImg from '../assets/images/login-front.jpg';
 import AppLogo from '../assets/images/foodZone-logo.png'
+import {loginAdminUser} from "../helpers/ApiHelpers.js";
+import { useNavigate } from 'react-router-dom';
+import {useEffect} from "react";
 
 const {Footer, Content} = Layout;
 
@@ -9,9 +12,35 @@ const footerStyle = {
     textAlign: 'center',
 };
 const Login = () => {
-    const onFinish = (values) => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (localStorage.getItem("token") !== null) {
+            navigate("/dashboard");
+        }
+    }, [navigate]);
+    const onFinish = async (values) => {
         console.log('Received values of form: ', values);
+        await adminLogin(values);
+        console.log(localStorage.getItem("token"));
+        if (localStorage.getItem("token") !== null) {
+            navigate("/dashboard");
+        }else {
+            navigate("/login");
+        }
     };
+    const adminLogin=async (data)=>{
+        try {
+            const response = await loginAdminUser(data);
+            const expirationDate= new Date();
+            expirationDate.setDate(expirationDate.getDate()+2);
+
+            const cookieValue=encodeURIComponent('token')+'='+
+            encodeURIComponent(response.data.token)+'; expires='+expirationDate.toUTCString()+'; path=/';
+            document.cookie=cookieValue;
+        }catch (e) {
+            console.log(e)
+        }
+    }
     return (
         <ConfigProvider
             theme={{
@@ -26,28 +55,9 @@ const Login = () => {
                     // borderRadius: 13,
                 },
                 components: {
-                    Typography: {
-                        fontSizeHeading1: 60
-
-                    },
-                    Carousel: {
-                        colorBgContainer: "var(--primary-color)",
-                        dotHeight: 10
-                    },
                     Button: {
                         colorPrimaryHover: "var(--primary-color)"
                     },
-                    Segmented: {
-                        itemSelectedBg: "#443111",
-                        colorText: "var(--primary-color)"
-                    },
-                    Card: {
-                        colorBgContainer: "rgba(250,173,20, 0.05)",
-                        boxShadowTertiary: "0 1px 2px 0 rgba(250,173,20, 0.3), 0 1px 6px -1px rgba(250,173,20, 0.2), 0 2px 4px 0 rgba(250,173,20, 0.2)"
-                    },
-                    Modal: {
-                        contentBg: "var(--model-background)"
-                    }
                 }
             }}
         >
@@ -63,8 +73,8 @@ const Login = () => {
                         color: "var(--text-color)"
                     }}
                     className="h-full">
-                    <Row >
-                        <Col xs={{ span: 12, offset: 0 }} md={{ span: 8, offset: 4 }} span={24}
+                    <Row>
+                        <Col xs={{span: 12, offset: 0}} md={{span: 8, offset: 4}} span={24}
                              className="border-r-0 rounded-r-none rounded-xl shadow-sm shadow-primaryColor"
                         >
                             <div style={{height: '80vh'}}
@@ -85,16 +95,20 @@ const Login = () => {
                                     onFinish={onFinish}
                                 >
                                     <Form.Item
-                                        name="username"
+                                        name="email"
                                         rules={[
                                             {
+                                                type: 'email',
+                                                message: 'The input is not valid E-mail!',
+                                            },
+                                            {
                                                 required: true,
-                                                message: 'Please input your Username!',
+                                                message: 'Please input your E-mail!',
                                             },
                                         ]}
                                     >
                                         <Input prefix={<UserOutlined className="site-form-item-icon"/>}
-                                               placeholder="Username"/>
+                                               placeholder="Email"/>
                                     </Form.Item>
                                     <Form.Item
                                         name="password"

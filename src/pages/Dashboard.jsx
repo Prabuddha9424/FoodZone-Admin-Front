@@ -1,4 +1,4 @@
-import {Card, Col, message, Row, Segmented, Spin} from "antd";
+import {Card, Col, message, Row, Segmented, Select, Spin} from "antd";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -9,7 +9,7 @@ import {
     Legend,
 } from 'chart.js';
 import {Bar} from 'react-chartjs-2';
-import {countAllCustomers, countAllOrders, countAllProducts} from "../helpers/ApiHelpers.jsx";
+import {countAllCustomers, countAllOrders, countAllProducts} from "../helpers/ApiHelpers.js";
 import {useEffect, useState} from "react";
 
 ChartJS.register(
@@ -115,7 +115,7 @@ function Dashboard() {
                         </p>
                     </Col>
                     <Col xs={{span: 24}} md={{span: 12}} lg={{span: 16}}>
-                        <Bar options={options} data={data}/>
+                        <Bar options={options} data={data} className="pb-16 w-full max-h-80"/>
                     </Col>
                 </Row>
             </Spin>

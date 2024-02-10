@@ -2,7 +2,7 @@ import {LockOutlined, UserOutlined} from '@ant-design/icons';
 import {Layout, Menu, Button, theme, ConfigProvider, Form, Input, Checkbox, Row, Col} from 'antd';
 import SignupImg from '../assets/images/signup-front.jpg';
 import AppLogo from '../assets/images/foodZone-logo.png'
-import {AddAdminUser} from "../helpers/ApiHelpers.jsx";
+import {AddAdminUser} from "../helpers/ApiHelpers.js";
 
 const {Footer, Content} = Layout;
 const formItemLayout = {

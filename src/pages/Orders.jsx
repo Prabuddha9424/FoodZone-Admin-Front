@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {FaEye} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import ViewCustomer from "../components/customers/ViewCustomer.jsx";
-import {deleteCustomers, deleteOrder, getAllOrders, updateOrder} from "../helpers/ApiHelpers.jsx";
+import {deleteCustomers, deleteOrder, getAllOrders, updateOrder} from "../helpers/ApiHelpers.js";
 import ViewOrder from "../components/orders/ViewOrders.jsx";
 
 

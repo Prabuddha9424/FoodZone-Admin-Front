@@ -9,7 +9,7 @@ import {FaEdit} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import {SearchOutlined} from "@ant-design/icons";
 import UpdateAdminUser from "../components/adminUsers/UpdateAdminUser.jsx";
-import {AddAdminUser, deleteAdminUsers, getAllAdminUsers} from "../helpers/ApiHelpers.jsx";
+import {AddAdminUser, deleteAdminUsers, getAllAdminUsers} from "../helpers/ApiHelpers.js";
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},

@@ -1,5 +1,5 @@
 import {Button, Col, Form, Input, Modal, Row} from "antd";
-import {updateAdminUsers} from "../../helpers/ApiHelpers.jsx";
+import {updateAdminUsers} from "../../helpers/ApiHelpers.js";
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
