@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {
     AppstoreFilled,
     MenuFoldOutlined,
@@ -12,6 +12,9 @@ import {IoFastFood} from "react-icons/io5";
 import {FaCartPlus} from "react-icons/fa";
 import {IoIosSettings, IoMdArrowDropright} from "react-icons/io";
 import {RiLogoutCircleRFill} from "react-icons/ri";
+import { useNavigate } from 'react-router-dom';
+import {getAllAdminUsers} from "../helpers/ApiHelpers.js";
+import Cookies from "js-cookie";
 
 const {Header, Sider, Footer, Content} = Layout;
 function getItem(label, key, icon, children, type) {
@@ -35,10 +38,32 @@ const items = [
         getItem(<Link to="/reset-password">Reset Password</Link>, 'sub51', <IoMdArrowDropright /> ),
     ])
 ];
+let allAdminData = [];
 function DashboardMain() {
     const [collapsed, setCollapsed] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const navigate = useNavigate();
+    useEffect(() => {
+        fetchData();
+    }, []);
     const onClick = (e) => {
         console.log('click ', e);
+    };
+    const fetchData = async () => {
+        const response = await getAllAdminUsers();
+        allAdminData = response.data;
+        console.log(allAdminData);
+    }
+    const logout = () => {
+        Cookies.remove('token');
+        localStorage.removeItem("token");
+        navigate("/login");
+    };
+    const handleHover = () => {
+        setIsHovered(true);
+    };
+    const handleMouseLeave = () => {
+        setIsHovered(false);
     };
     return (
         <ConfigProvider
@@ -49,7 +74,7 @@ function DashboardMain() {
                     colorInfo: "#faad14",
                     colorWarning: "#fa541c",
                     colorBgBase: "#050606",
-                    colorBgContainer: "#050606"
+                    colorBgContainer: "#050606",
                     // borderRadius: 13,
                 },
                 components: {
@@ -78,6 +103,9 @@ function DashboardMain() {
                     Card: {
                         colorBgContainer: "rgba(250,173,20, 0.05)",
                         boxShadowTertiary:"0 1px 2px 0 rgba(250,173,20, 0.3), 0 1px 6px -1px rgba(250,173,20, 0.2), 0 2px 4px 0 rgba(250,173,20, 0.2)"
+                    },
+                    Modal: {
+                        contentBg: "var(--model-background)"
                     }
                 }
             }}
@@ -124,18 +152,19 @@ function DashboardMain() {
                                 height: 64,
                             }}
                         />
-                        <p className="text-xl font-serif">Hi, Prabuddha</p>
                         <Button
                             type="text"
-                            icon={<RiLogoutCircleRFill />}
-                            onClick={() => {}}
+                            icon={<RiLogoutCircleRFill style={{ fill: isHovered ? 'var(--primary-color)' : 'var(--text-color)'}}/>}
+                            onClick={logout}
                             style={{
                                 fontSize: '16px',
                                 textAlign: "center"
                             }}
-                            className="flex items-center justify-center"
+                            onMouseEnter={handleHover}
+                            onMouseLeave={handleMouseLeave}
+                            className="flex items-center justify-center hover:text-primaryColor"
                         >
-                            <p>Logout</p>
+                            <p className="hover:text-primaryColor">Logout</p>
                         </Button>
 
                     </Header>

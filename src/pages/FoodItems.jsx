@@ -1,15 +1,14 @@
-import {
-    Avatar,
-    Button, Col,
-    Form,
-    Input,
-    Row, Table, Upload,
-} from 'antd';
+import {Button, Col, Form, Input, message, Row, Select, Spin, Table,} from 'antd';
 import {useEffect, useState} from "react";
-import {FaEdit, FaRegImage} from "react-icons/fa";
+import {FaEdit} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import {SearchOutlined} from "@ant-design/icons";
-import UpdateAdminUser from "../components/adminUsers/UpdateAdminUser.jsx";
+import {storage} from "../config/FirebaseConfig.js";
+import {getDownloadURL, ref, uploadBytes} from "firebase/storage"
+import {v4} from "uuid";
+import {AddProduct, deleteProduct, getAllProducts} from "../helpers/ApiHelpers.js";
+import UpdateFoodItems from "../components/foodItems/UpdateFoodItems.jsx";
+const { Option } = Select;
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
@@ -19,34 +18,14 @@ const formItemLayout = {
 const tailFormItemLayout = {
     wrapperCol: {xs: {span: 24, offset: 0,}, sm: {span: 16, offset: 8,},},
 };
-const dataSource = [
-    {
-        key: '1',
-        id: 'user1',
-        name: 'Mike',
-        image:"https://img.freepik.com/free-photo/tasty-burger-isolated-white-background-fresh-hamburger-fastfood-with-beef-cheese_90220-1063.jpg?size=338&ext=jpg&ga=GA1.1.1448711260.1707091200&semt=sph",
-        email: 'mike@gmail.com',
-        phone: 711234567,
-        address: '10 Downing Street',
-    },
-    {
-        key: '2',
-        id: 'user2',
-        name: 'John',
-        image:"https://img.freepik.com/free-photo/chicken-wings-barbecue-sweetly-sour-sauce-picnic-summer-menu-tasty-food-top-view-flat-lay_2829-6471.jpg",
-        email: 'john@gmail.com',
-        phone: 711234667,
-        address: '10 Downing Street',
-    },
-];
-
 const columns = [
     {
         title: 'Image',
         dataIndex: 'image',
         key: 'image',
-        render:(link)=>{
-            return <Avatar src={link}/>
+        render: (link) => {
+            //return <Avatar src={link}/>
+            return <img src={link} alt="food" className="w-[80px] h-[80px] rounded-full"/>
         }
     },
     {
@@ -61,8 +40,8 @@ const columns = [
     },
     {
         title: 'Quantity',
-        dataIndex: 'quantity',
-        key: 'quantity',
+        dataIndex: 'qty',
+        key: 'qty',
     },
     {
         title: 'Price',
@@ -75,31 +54,88 @@ const columns = [
         key: 'option',
     },
 ];
-const normFile = (e) => {
-    if (Array.isArray(e)) {
-        return e;
-    }
-    return e?.fileList;
-};
+let allProduct=[];
 function FoodItems() {
     const [tableData, setTableData] = useState();
     const [dataLoading, setDataLoading] = useState()
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [modelData, setModelData] = useState()
+    const [foodItemForm] = Form.useForm();
+    const [imageUpload, setImageUpload] = useState(null);
+    const [spinning, setSpinning] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const onCategoryChange = (value) => {
+        switch (value) {
+            case 'setMenu':
+                foodItemForm.setFieldsValue({
+                    note: 'Set Menu',
+                });
+                break;
+            case 'desert':
+                foodItemForm.setFieldsValue({
+                    note: 'Desert',
+                });
+                break;
+            case 'beverage':
+                foodItemForm.setFieldsValue({
+                    note: 'Beverage',
+                });
+                break;
+            default:
+        }
+    };
+
     useEffect(() => {
-        setData(dataSource)
+        fetchData();
     }, []);
-    const setData = (dataArr) => {
+    const onFinish = async (values) => {
+        try {
+            setSpinning(true);
+            const uploadImageUrl = await uploadImage();
+            values["image"] = uploadImageUrl;
+            const res = await AddProduct(values);
+            messageApi.open({
+                type: 'success',
+                content: `${res.data.message}`,
+            });
+            foodItemForm.resetFields();
+            await fetchData();
+            setSpinning(false);
+        } catch (err) {
+            messageApi.open({
+                type: 'error',
+                content: `${err.response.data.error}`,
+            });
+        }
+    };
+    const uploadImage = async () => {
+        if (imageUpload !== null) {
+            const imgRef = ref(storage, `FoodImages/${imageUpload.name + v4()}`);
+            await uploadBytes(imgRef, imageUpload);
+            return await getDownloadURL(imgRef);
+        }
+    }
+    const fetchData = async () => {
+        const response = await getAllProducts();
+        allProduct = response.data;
+        console.log(allProduct);
+        await setData(allProduct);
+    }
+    const setData = async (dataArr) => {
         setDataLoading(true);
-        if (dataArr.length != null) {
+        if (dataArr === null) {
+            setTableData([]);
+        } else if (dataArr.length !== null) {
             let tableRows = [];
             dataArr.forEach((data, x) => {
                 let dataRow = {
                     key: x,
                     name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
+                    price: data.price,
+                    qty: data.qty,
+                    category: data.category,
+                    image: data.image,
                     option: (
                         <div className="flex flex-row gap-4 text-2xl">
                             <a
@@ -108,6 +144,7 @@ function FoodItems() {
                                 }}>
                                 <FaEdit style={{fontSize: '18px'}}/>
                             </a>
+
                             <a
                                 onClick={() => {
                                     deleteData(data);
@@ -118,188 +155,214 @@ function FoodItems() {
                     ),
                 };
                 tableRows.push(dataRow);
-                setTableData(tableRows);
             })
+            setTableData(tableRows);
         } else {
             setTableData([]);
         }
         setDataLoading(false);
     };
     const updateData = (data) => {
+        setIsModelOpen(true);
         setModelData(data);
-        setIsModelOpen(!isModelOpen);
-        //setData(dataSource);
     };
-    const closeModel = () => {
-        setIsModelOpen(!isModelOpen);
-
+    const closeModel = async (data) => {
+        setIsModelOpen(false);
+        setSpinning(true);
+        await fetchData();
+        setSpinning(false);
     };
-    const deleteData = (data) => {
-        console.log(data.id);
-        setData(dataSource);
+    const deleteData = async (data) => {
+        setSpinning(true);
+        try {
+            const response = await deleteProduct(data._id);
+            setSpinning(false);
+            messageApi.open({
+                type: 'success',
+                content: `${response.data.message}`,
+            });
+        } catch (err) {
+            setSpinning(false);
+            messageApi.open({
+                type: 'error',
+                content: `${err.response.data.message}`,
+            });
+        }
+        await fetchData();
+        console.log('ok');
     };
     const searchData = (text) => {
-        let filtered = dataSource.filter((data) => {
+        let filtered = allProduct.filter((data) => {
             return (data.name.toLowerCase().includes(text.toLowerCase()));
         });
         setData(filtered);
     };
-
     return (
         <div>
-            <Row className="flex">
-                <p className="text-xl font-serif pb-4 text-primaryColor">Add New Food Item</p>
-            </Row>
-            <Row>
-                <FoodItemForm/>
-            </Row>
-            <Row>
-                <p className="text-xl font-serif p-4 text-primaryColor">All Food Items</p>
-                <div
-                    className="flex flex-row w-100px md:w-[200px] items-center h-auto rounded-2xl">
-                    <Input
-                        className="rounded-full"
-                        type="text"
-                        placeholder="Search Food Item"
-                        onChange={(e) => {
-                            searchData(e.target.value);
-                        }}
-                        suffix={<SearchOutlined
-                            style={{fontSize: '16px', color: 'var(--border-blue)', fontWeight: 'bolder'}}
-                            className="site-form-item-icon"/>}
-                    />
-                </div>
-            </Row>
-            <Row>
-                <Table
-                    className="w-full"
-                    dataSource={tableData}
-                    columns={columns}
-                    loading={dataLoading}
-                    pagination={{
-                        size: "small",
-                        defaultPageSize: 5,
-                        showSizeChanger: true,
-                        pageSizeOptions: ["5", "10", "20"],
-                        showQuickJumper: true,
-                    }}
-                />
-                {(isModelOpen) ?
-                    <UpdateAdminUser
-                        modalOpenClose={isModelOpen}
-                        data={modelData}
-                        handleCancel={closeModel}
-                    /> :
-                    <></>
-                }
+            <Spin spinning={spinning}>
+                {contextHolder}
+                <Row className="flex">
+                    <p className="text-xl font-serif pb-4 text-primaryColor">Add New Food Item</p>
+                </Row>
+                <Row>
+                    <Form
+                        {...formItemLayout}
+                        form={foodItemForm}
+                        name="register"
+                        onFinish={onFinish}
+                        scrollToFirstError
+                        className="w-full"
+                    >
+                        <Row gutter={24}>
+                            <Col xs={{span: 24}} md={{span: 12}}>
+                                <Form.Item
+                                    name="name"
+                                    label="Name"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Please input food name!',
+                                            whitespace: true,
+                                        },
+                                    ]}
+                                >
+                                    <Input/>
+                                </Form.Item>
 
-            </Row>
+                                <Form.Item
+                                    name="category"
+                                    label="Category"
+                                    rules={[
+                                        {
+                                            required: true,
+                                        },
+                                    ]}
+                                >
+                                    <Select
+                                        placeholder="Select food category"
+                                        onChange={onCategoryChange}
+                                        allowClear
+                                    >
+                                        <Option value="Set Menu">Set Menu</Option>
+                                        <Option value="Desert">Desert</Option>
+                                        <Option value="Beverage">Beverage</Option>
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item
+                                    name="qty"
+                                    label="Quantity"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Please input quantity!',
+                                            whitespace: true,
+                                        },
+                                    ]}
+                                >
+                                    <Input/>
+                                </Form.Item>
+
+                                <Form.Item
+                                    name="price"
+                                    label="Price"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Please input food item price!',
+                                        },
+                                    ]}
+                                >
+                                    <Input/>
+                                </Form.Item>
+                            </Col>
+                            <Col xs={{span: 24}} md={{span: 12}}>
+                                <Form.Item
+                                    name="intro"
+                                    label="Description"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Please input details of item',
+                                        },
+                                    ]}
+                                >
+                                    <Input.TextArea showCount maxLength={400} />
+                                </Form.Item>
+                                <Form.Item
+                                    label="Image"
+                                    name="imageFile"
+                                    rules={[
+                                        {
+                                            required: true,
+                                        },
+                                    ]}
+                                >
+                                    <div>
+                                        <input
+                                            style={{borderRadius: "8px"}}
+                                            type="file"
+                                            id="file"
+                                            onChange={e => {
+                                                setImageUpload(e.target.files[0])
+                                            }}
+                                        />
+                                        <label htmlFor="file">
+                                        </label>
+                                    </div>
+                                </Form.Item>
+                            </Col>
+                            <Form.Item {...tailFormItemLayout}>
+                                <Button type="primary" htmlType="submit">
+                                    Save Food Item
+                                </Button>
+                            </Form.Item>
+                        </Row>
+                    </Form>
+                </Row>
+                <Row>
+                    <p className="text-xl font-serif p-4 text-primaryColor">All Food Items</p>
+                    <div
+                        className="flex flex-row w-100px md:w-[200px] items-center h-auto rounded-2xl">
+                        <Input
+                            className="rounded-full"
+                            type="text"
+                            placeholder="Search Food Item"
+                            onChange={(e) => {
+                                searchData(e.target.value);
+                            }}
+                            suffix={<SearchOutlined
+                                style={{fontSize: '16px', color: 'var(--border-blue)', fontWeight: 'bolder'}}
+                                className="site-form-item-icon"/>}
+                        />
+                    </div>
+                </Row>
+                <Row>
+                    <Table
+                        className="w-full"
+                        dataSource={tableData}
+                        columns={columns}
+                        loading={dataLoading}
+                        pagination={{
+                            size: "small",
+                            defaultPageSize: 5,
+                            showSizeChanger: true,
+                            pageSizeOptions: ["5", "10", "20"],
+                            showQuickJumper: true,
+                        }}
+                    />
+                    {(isModelOpen) ?
+                        <UpdateFoodItems
+                            modalOpenClose={isModelOpen}
+                            data={modelData}
+                            handleCancel={closeModel}
+                        /> :
+                        <></>
+                    }
+
+                </Row>
+            </Spin>
         </div>
     );
 }
 
-const FoodItemForm = () => {
-    const [form] = Form.useForm();
-    const onFinish = (values) => {
-        console.log('Received values of form: ', values);
-    };
-    return (
-        <Form
-            {...formItemLayout}
-            form={form}
-            name="register"
-            onFinish={onFinish}
-            scrollToFirstError
-            className="w-full"
-        >
-            <Row gutter={24}>
-                <Col xs={{span: 24}} md={{span: 12}}>
-                    <Form.Item
-                        name="email"
-                        label="E-mail"
-                        rules={[
-                            {
-                                type: 'email',
-                                message: 'The input is not valid E-mail!',
-                            },
-                            {
-                                required: true,
-                                message: 'Please input your E-mail!',
-                            },
-                        ]}
-                    >
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item
-                        name="name"
-                        label="Name"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input your name!',
-                                whitespace: true,
-                            },
-                        ]}
-                    >
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item
-                        name="residence"
-                        label="Residence"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input your name!',
-                                whitespace: true,
-                            },
-                        ]}
-                    >
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item
-                        name="phone"
-                        label="Phone Number"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input your phone number!',
-                            },
-                        ]}
-                    >
-                        <Input/>
-                    </Form.Item>
-                </Col>
-                <Col xs={{span: 24}} md={{span: 12}}>
-                    <Form.Item label="Food Image" valuePropName="fileList" getValueFromEvent={normFile}>
-                        <Upload action="/upload.do" listType="picture-card">
-                            <button
-                                style={{
-                                    border: 0,
-                                    background: 'none',
-                                }}
-                                type="button"
-                            >
-                                <FaRegImage />
-                                <div
-                                    style={{
-                                        marginTop: 8,
-                                    }}
-                                >
-                                    Upload
-                                </div>
-                            </button>
-                        </Upload>
-                    </Form.Item>
-                </Col>
-                <Form.Item {...tailFormItemLayout}>
-                    <Button type="primary" htmlType="submit">
-                        Save Admin
-                    </Button>
-                </Form.Item>
-            </Row>
-        </Form>
-    );
-};
 export default FoodItems;

@@ -9,7 +9,7 @@ import {FaEdit} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import {SearchOutlined} from "@ant-design/icons";
 import UpdateAdminUser from "../components/adminUsers/UpdateAdminUser.jsx";
-import {AddAdminUser, deleteAdminUsers, getAllAdminUsers} from "../helpers/ApiHelpers.jsx";
+import {AddAdminUser, deleteAdminUsers, getAllAdminUsers} from "../helpers/ApiHelpers.js";
 
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
@@ -62,7 +62,7 @@ function AdminUsers() {
         fetchData();
     }, []);
 
-    const [form] = Form.useForm();
+    const [adminForm] = Form.useForm();
     const onFinish = async (values) => {
         try {
             setSpinning(true);
@@ -72,7 +72,7 @@ function AdminUsers() {
                 content: `${res.data.message}`,
             });
             setSpinning(false);
-            form.resetFields();
+            adminForm.resetFields();
             await fetchData();
         } catch (err) {
             messageApi.open({
@@ -135,11 +135,12 @@ function AdminUsers() {
         setSpinning(true);
         await fetchData();
         setSpinning(false);
-        messageApi.open({
-            type: 'success',
-            content: `${data.data.message}`,
-        });
-
+        if (data?.data?.message && typeof data.data.message === 'string') {
+            messageApi.open({
+                type: 'success',
+                content: `${data.data.message}`,
+            });
+        }
     };
     const deleteData = async (data) => {
         setSpinning(true);
@@ -178,7 +179,7 @@ function AdminUsers() {
                 <Row>
                     <Form
                         {...formItemLayout}
-                        form={form}
+                        form={adminForm}
                         name="register"
                         onFinish={onFinish}
                         scrollToFirstError
