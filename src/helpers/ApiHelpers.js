@@ -7,6 +7,9 @@ export async function AddAdminUser(data){
 export async function loginAdminUser(data){
     return await axiosInstance.post(`/admin/login`,data);
 }
+export async function passwordReset(data){
+    return await axiosInstance.post(`/admin/reset-password`,data);
+}
 export async function getAllAdminUsers(){
     return await axiosInstance.get(`/admin/find-all`);
 }
@@ -53,6 +56,12 @@ export async function deleteOrder(id){
 export async function updateOrder(id,data){
     return await axiosInstance.put(`/orders/update/${id}`,data);
 }
-export async function countAllOrders(){
-    return await axiosInstance.get(`/orders/count-all`);
+export async function countAllProcessingOrders(){
+    return await axiosInstance.get(`/orders/count-all/processing`);
+}
+export async function countAllCompletedOrders(){
+    return await axiosInstance.get(`/orders/count-all/completed`);
+}
+export async function getAdminOrders(){
+    return await axiosInstance.get(`/orders/find-all/admin/payStatus=1`);
 }

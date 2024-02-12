@@ -119,6 +119,7 @@ function FoodItems() {
     const fetchData = async () => {
         const response = await getAllProducts();
         allProduct = response.data;
+        console.log(allProduct);
         await setData(allProduct);
     }
     const setData = async (dataArr) => {
@@ -285,7 +286,7 @@ function FoodItems() {
                                         },
                                     ]}
                                 >
-                                    <Input.TextArea showCount maxLength={200} />
+                                    <Input.TextArea showCount maxLength={400} />
                                 </Form.Item>
                                 <Form.Item
                                     label="Image"

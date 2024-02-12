@@ -9,7 +9,12 @@ import {
     Legend,
 } from 'chart.js';
 import {Bar} from 'react-chartjs-2';
-import {countAllCustomers, countAllOrders, countAllProducts} from "../helpers/ApiHelpers.js";
+import {
+    countAllCompletedOrders,
+    countAllCustomers,
+    countAllProcessingOrders,
+    countAllProducts
+} from "../helpers/ApiHelpers.js";
 import {useEffect, useState} from "react";
 
 ChartJS.register(
@@ -57,13 +62,16 @@ function Dashboard() {
     const [spinning, setSpinning] = useState(false);
     const [allCustomers, setAllCustomers] = useState("")
     const [allProducts, setAllProducts] = useState("")
-    const [allOrders, setAllOrders] = useState("")
+    const [processingOrders, setProcessingOrders] = useState("");
+    const [completedOrders, setCompletedOrders] = useState("");
+
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
         countCustomers();
         countProducts();
-        countOrders();
+        countProcessingOrders();
+        countCompletedOrders();
     }, []);
     const changeOption = (val) => {
         console.log(val);
@@ -80,10 +88,16 @@ function Dashboard() {
         setAllProducts(response ? response.data : "0");
         setSpinning(false);
     };
-    const countOrders = async () => {
+    const countProcessingOrders = async () => {
         setSpinning(true);
-        const response = await countAllOrders();
-        setAllOrders(response ? response.data : "0");
+        const response = await countAllProcessingOrders();
+        setProcessingOrders(response ? response.data : "0");
+        setSpinning(false);
+    };
+    const countCompletedOrders = async () => {
+        setSpinning(true);
+        const response = await countAllCompletedOrders();
+        setCompletedOrders(response ? response.data : "0");
         setSpinning(false);
     };
     return (
@@ -100,18 +114,18 @@ function Dashboard() {
                 <Row gutter={[24, 24]} className="pt-10">
                     <DashboardCard title="TOTAL CUSTOMERS" value={allCustomers}/>
                     <DashboardCard title="TOTAL FOOD ITEMS" value={allProducts}/>
-                    <DashboardCard title="TOTAL ORDERS" value={allOrders}/>
+                    <DashboardCard title="TOTAL ORDERS" value={completedOrders+processingOrders}/>
                 </Row>
                 <Row className="p-6 pt-24">
                     <Col xs={{span: 24}} md={{span: 12}} lg={{span: 8}}>
                         <p className="text-base font-normal pb-6"><span className="bg-backgroundYellow p-2 rounded-xl">TODAY RECORDS</span>
                         </p>
                         <p className="text-3xl font-medium pb-10">Available Orders: <span
-                            className="text-red-700">10</span>
+                            className="text-red-700">{completedOrders+processingOrders}</span>
                         </p>
                         <p className="text-3xl font-medium pb-10">Processing Orders: <span
-                            className="text-yellow-700">5</span></p>
-                        <p className="text-3xl font-medium">Completed Orders: <span className="text-green-700">2</span>
+                            className="text-yellow-700">{processingOrders}</span></p>
+                        <p className="text-3xl font-medium">Completed Orders: <span className="text-green-700">{completedOrders}</span>
                         </p>
                     </Col>
                     <Col xs={{span: 24}} md={{span: 12}} lg={{span: 16}}>

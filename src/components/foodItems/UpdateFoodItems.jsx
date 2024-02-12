@@ -164,7 +164,7 @@ function UpdateFoodItems({modalOpenClose, handleCancel, data}) {
                                     },
                                 ]}
                             >
-                                <Input.TextArea showCount maxLength={200} />
+                                <Input.TextArea showCount maxLength={400} />
                             </Form.Item>
                         </Col>
                         <Col xs={{span: 24}} md={{span: 12}}>

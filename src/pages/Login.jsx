@@ -21,7 +21,6 @@ const Login = () => {
     const onFinish = async (values) => {
         console.log('Received values of form: ', values);
         await adminLogin(values);
-        console.log(localStorage.getItem("token"));
         if (localStorage.getItem("token") !== null) {
             navigate("/dashboard");
         }else {
@@ -140,8 +139,8 @@ const Login = () => {
                                             <Button type="primary" htmlType="submit" className="login-form-button">
                                                 Log in
                                             </Button>
-                                            <p className="px-2">Or</p>
-                                            <a href="">register now!</a>
+                                            {/*<p className="px-2">Or</p>
+                                            <a href="">register now!</a>*/}
                                         </div>
 
                                     </Form.Item>

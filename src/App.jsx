@@ -8,9 +8,10 @@ import Orders from "./pages/Orders.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import Login from "./pages/Login.jsx";
 import SignUp from "./pages/signup.jsx";
-import {getLocalStorageData} from "./helpers/StorageHelper.js";
+import Cookies from 'js-cookie';
+//import {getLocalStorageData} from "./helpers/StorageHelper.js";
 function App() {
-    const token = getLocalStorageData("token");
+    const token = Cookies.get('token');
   return (
     <Router>
       <Routes>

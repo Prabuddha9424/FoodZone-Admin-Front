@@ -20,15 +20,15 @@ function ViewOrder({modalOpenClose, handleCancel, data}) {
                 <Row className="items-baseline flex">
                     <Col span={8} offset={2}>
                         <p className="py-4">Item</p>
-                        <p className="py-4">Customer Name</p>
-                        <p className="py-4">Customer Phone</p>
+                        <p className="py-4">Customer Email</p>
+                        <p className="py-4">Order Quantity</p>
                         <p className="py-4">Price</p>
                     </Col>
                     <Col span={12} className="pl-2 text-primaryColor">
                         <p className="py-4 font-medium text-xl text-successColor"><span
                             className="pr-3">:</span>{data.item}</p>
-                        <p className="py-4"><span className="pr-3">:</span>{data.userData.name}</p>
-                        <p className="py-4"><span className="pr-3">:</span>{data.userData.phone}</p>
+                        <p className="py-4"><span className="pr-3">:</span>{data.email}</p>
+                        <p className="py-4"><span className="pr-3">:</span>{data.qty}</p>
                         <p className="py-4"><span className="pr-3">:</span>{data.price}</p>
                     </Col>
                 </Row>

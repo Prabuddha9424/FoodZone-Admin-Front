@@ -1,5 +1,7 @@
 import {Button, Col, Form, Input, message, Row, Spin} from 'antd';
 import {useState} from "react";
+import {passwordReset} from "../helpers/ApiHelpers.js";
+import {useNavigate} from "react-router-dom";
 const formItemLayout = {
     labelCol: {xs: {span: 24,}, sm: {span: 8,},},
     wrapperCol: {xs: {span: 24,}, sm: {span: 16,},},
@@ -12,25 +14,29 @@ const tailFormItemLayout = {
 function ResetPassword() {
     const [messageApi, contextHolder] = message.useMessage();
     const [spinning, setSpinning] = useState(false);
+    const navigate = useNavigate();
 
 
     const [adminForm] = Form.useForm();
     const onFinish = async (values) => {
-        // try {
-        //     setSpinning(true);
-        //     const res = await AddAdminUser(values);
-        //     messageApi.open({
-        //         type: 'success',
-        //         content: `${res.data.message}`,
-        //     });
-        //     setSpinning(false);
-        //     adminForm.resetFields();
-        // } catch (err) {
-        //     messageApi.open({
-        //         type: 'error',
-        //         content: `${err.response.data.error}`,
-        //     });
-        // }
+
+        try {
+            setSpinning(true);
+            const res = await passwordReset(values);
+            messageApi.open({
+                type: 'success',
+                content: `${res.data.message}`,
+            });
+            setSpinning(false);
+            adminForm.resetFields();
+            localStorage.removeItem("token");
+            navigate("/login");
+        } catch (err) {
+            messageApi.open({
+                type: 'error',
+                content: `${err.response.data.error}`,
+            });
+        }
     };
 
     return (
@@ -52,6 +58,22 @@ function ResetPassword() {
                         <Row gutter={24}>
                             <Col xs={{span: 24}} md={{span: 12}}>
                                 <Form.Item
+                                    name="email"
+                                    label="E-mail"
+                                    rules={[
+                                        {
+                                            type: 'email',
+                                            message: 'The input is not valid E-mail!',
+                                        },
+                                        {
+                                            required: true,
+                                            message: 'Please input your E-mail!',
+                                        },
+                                    ]}
+                                >
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item
                                     name="currentPassword"
                                     label="Current Password"
                                     rules={[
@@ -70,7 +92,7 @@ function ResetPassword() {
                                     rules={[
                                         {
                                             required: true,
-                                            message: 'Please input your password!',
+                                            message: 'Please input your new password!',
                                         },
                                     ]}
                                     hasFeedback
@@ -86,7 +108,7 @@ function ResetPassword() {
                                     rules={[
                                         {
                                             required: true,
-                                            message: 'Please confirm your password!',
+                                            message: 'Please confirm your new password!',
                                         },
                                         ({getFieldValue}) => ({
                                             validator(_, value) {

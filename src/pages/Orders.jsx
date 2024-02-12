@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {FaEye} from "react-icons/fa";
 import {AiFillDelete} from "react-icons/ai";
 import ViewCustomer from "../components/customers/ViewCustomer.jsx";
-import {deleteCustomers, deleteOrder, getAllOrders, updateOrder} from "../helpers/ApiHelpers.js";
+import {deleteCustomers, deleteOrder, getAdminOrders, getAllOrders, updateOrder} from "../helpers/ApiHelpers.js";
 import ViewOrder from "../components/orders/ViewOrders.jsx";
 
 
@@ -22,8 +22,8 @@ const columns = [
         key: 'item',
     },
     {
-        title: 'User Data',
-        dataIndex: 'userData',
+        title: 'Customer Email',
+        dataIndex: 'email',
         key: 'userData',
     },
     {
@@ -60,7 +60,7 @@ function Orders() {
         fetchData();
     }, []);
     const fetchData = async () => {
-        const response = await getAllOrders();
+        const response = await getAdminOrders();
         allOrdersData = response.data;
         await setData(allOrdersData);
     }
@@ -75,11 +75,7 @@ function Orders() {
                     key: x,
                     id: data._id,
                     item: data.item,
-                    userData: (<div>
-                            <p>{data.userData.name}</p>
-                            <p>{data.userData.phone}</p>
-                        </div>
-                    ),
+                    email: data.email,
                     price: data.price,
                     qty: data.qty,
                     status: (<Button
